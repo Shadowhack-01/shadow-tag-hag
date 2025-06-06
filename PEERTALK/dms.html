@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct Messages - Peer Talk</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .dms-container {
+            display: flex;
+            height: calc(100vh - 60px);
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin: 15px;
+            overflow: hidden;
+            min-width: 1100px;
+            max-width: 95vw;
+            width: 100%;
+        }
+        .chats-list {
+            width: 300px;
+            border-right: 1px solid #eee;
+            overflow-y: auto;
+            position: relative;
+        }
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .chat-item:hover {
+            background: #f5f5f5;
+        }
+        .chat-item.active {
+            background: #e3f2fd;
+        }
+        .chat-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+        .chat-info {
+            flex: 1;
+        }
+        .chat-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .chat-preview {
+            color: #666;
+            font-size: 0.9em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .chat-window {
+            flex: 2.5;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            min-width: 600px;
+        }
+        .chat-header {
+            padding: 15px 24px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            background: #fff;
+            justify-content: space-between;
+        }
+        .chat-avatar-wrapper {
+            position: relative;
+            margin-right: 15px;
+        }
+        .user-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #31a24c;
+            border: 2px solid #fff;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+        .chat-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .chat-actions button {
+            background: #f0f2f5;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #1877f2;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .chat-actions button:hover {
+            background: #e4e6eb;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #f0f2f5;
+        }
+        .message {
+            margin-bottom: 15px;
+            max-width: 70%;
+            display: flex;
+            flex-direction: column;
+        }
+        .message.sent {
+            margin-left: auto;
+            align-items: flex-end;
+        }
+        .message-content {
+            padding: 10px 15px;
+            border-radius: 15px;
+            background: #fff;
+            display: inline-block;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .message.sent .message-content {
+            background: #1877f2;
+            color: white;
+        }
+        .message-time {
+            font-size: 0.75em;
+            color: #666;
+            margin-top: 4px;
+        }
+        .chat-input {
+            padding: 15px;
+            border-top: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fff;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            border-radius: 24px;
+            outline: none;
+            font-size: 14px;
+        }
+        .chat-input input:focus {
+            border-color: #1877f2;
+            box-shadow: 0 0 0 2px rgba(24,119,242,0.1);
+        }
+        .chat-input button {
+            background: #1877f2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 24px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+        .chat-input button:hover {
+            background: #1664d9;
+        }
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #666;
+            background: #f8f9fa;
+        }
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #1877f2;
+        }
+        .empty-state p {
+            font-size: 16px;
+            text-align: center;
+            max-width: 280px;
+            line-height: 1.4;
+        }
+        /* New Chat Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            margin: 50px auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: modalSlideIn 0.3s ease;
+        }
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+        }
+        .modal-header h3 {
+            margin: 0;
+            color: #1c1e21;
+            font-size: 18px;
+        }
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+        .close-modal:hover {
+            background: #eee;
+        }
+        .modal-body {
+            padding: 20px;
+        }
+        #userSearch {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        #userSearch:focus {
+            border-color: #1877f2;
+            box-shadow: 0 0 0 2px rgba(24,119,242,0.1);
+            outline: none;
+        }
+        #usersList {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .user-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .user-item:hover {
+            background: #f5f5f5;
+        }
+        .user-item img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+            object-fit: cover;
+        }
+        .new-chat-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: #1877f2;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(24,119,242,0.4);
+            transition: all 0.2s;
+        }
+        .new-chat-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(24,119,242,0.5);
+        }
+        .chat-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .chat-time {
+            font-size: 0.75em;
+            color: #666;
+        }
+        .unread-badge {
+            background: #1877f2;
+            color: white;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 0.75em;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-sidebar">
+            <div class="user-profile">
+                <img src="assets/images/default-avatar.png" alt="User Avatar">
+                <div class="user-info">
+                    <h4 class="user-nickname">Loading...</h4>
+                    <p>Creator & Editor</p>
+                </div>
+            </div>
+            <div class="menu-section">
+                <h3>MENU</h3>
+                <div class="menu-links">
+                    <a href="post.html" data-section="discover"><i class="fas fa-compass"></i> Discover</a>
+                    <a href="#" data-section="trendings"><i class="fas fa-chart-line"></i> Trendings</a>
+                    <a href="#" data-section="explore"><i class="fas fa-globe"></i> Explore</a>
+                    <a href="#" data-section="notification"><i class="fas fa-bell"></i> Notification</a>
+                    <a href="dms.html" class="active" data-section="dms"><i class="fas fa-envelope"></i> Dms</a>
+                    <a href="#" data-section="groups"><i class="fas fa-users"></i> Groups</a>
+                    <a href="#" data-section="settings"><i class="fas fa-cog"></i> Setting</a>
+                    <a href="#" data-section="games"><i class="fas fa-gamepad"></i> Games</a>
+                </div>
+            </div>
+            <div class="library-section">
+                <h3>LIBRARY</h3>
+                <div class="library-links">
+                    <a href="#" data-section="wallet"><i class="fas fa-wallet"></i> Wallet</a>
+                    <a href="#" data-section="lives"><i class="fas fa-video"></i> Lives Channels</a>
+                    <a href="#" data-section="recent"><i class="fas fa-clock"></i> Recent</a>
+                    <a href="#" data-section="playlists"><i class="fas fa-list"></i> Playlists</a>
+                    <a href="#" data-section="favourites"><i class="fas fa-heart"></i> Favourites</a>
+                    <a href="#" data-section="locals"><i class="fas fa-map-marker-alt"></i> Locals</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="content-header">
+                <div class="header-nav">
+                    <a href="#" class="active">Messages</a>
+                </div>
+                <div class="search-bar">
+                    <input type="text" placeholder="Search messages...">
+                </div>
+            </div>
+
+            <div class="dms-container">
+                <div class="chats-list">
+                    <!-- Chat list items will be added here by JavaScript -->
+                    <button class="new-chat-btn" id="newChatBtn">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                
+                <div class="chat-window">
+                    <!-- Chat header with actions (Facebook style) -->
+                    <div class="chat-header" style="display:none;">
+                        <div style="display:flex;align-items:center;">
+                            <div class="chat-avatar-wrapper">
+                                <img src="assets/images/default-avatar.png" alt="Chat Avatar" class="chat-avatar">
+                                <div class="user-status online"></div>
+                            </div>
+                            <div class="chat-info">
+                                <div class="chat-name">User Name</div>
+                                <div class="chat-status" id="typingStatus"></div>
+                            </div>
+                        </div>
+                        <div class="chat-actions">
+                            <button class="call-btn" title="Voice Call"><i class="fas fa-phone"></i></button>
+                            <button class="video-btn" title="Video Call"><i class="fas fa-video"></i></button>
+                            <button class="voice-note-btn" title="Send Voice Note"><i class="fas fa-microphone"></i></button>
+                        </div>
+                    </div>
+                    <!-- Chat messages will be rendered here -->
+                    <div class="chat-messages" style="display:none;"></div>
+                    <!-- Chat input area -->
+                    <div class="chat-input" style="display:none;">
+                        <input type="text" placeholder="Type a message..." id="messageInput">
+                        <button id="sendMessageBtn"><i class="fas fa-paper-plane"></i> Send</button>
+                    </div>
+                    <!-- Empty state -->
+                    <div class="empty-state">
+                        <i class="fas fa-comments"></i>
+                        <p>Select a conversation or start a new one</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Chat Modal -->
+    <div id="newChatModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>New Message</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="userSearch" placeholder="Type a name or email...">
+                <div id="usersList">
+                    <!-- User search results will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="dms.js"></script>
+    <script>
+        // Placeholder JS for call/voice note buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.call-btn').forEach(btn => {
+                btn.onclick = () => alert('Voice call feature coming soon!');
+            });
+            document.querySelectorAll('.video-btn').forEach(btn => {
+                btn.onclick = () => alert('Video call feature coming soon!');
+            });
+            document.querySelectorAll('.voice-note-btn').forEach(btn => {
+                btn.onclick = () => alert('Voice note feature coming soon!');
+            });
+        });
+    </script>
+</body>
+</html>

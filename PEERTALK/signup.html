@@ -1,10 +1,9 @@
-<!-- PeerTalk: Login Page-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Peer Talk</title>
+    <title>Sign Up - Peer Talk</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -17,10 +16,10 @@
             align-items: center;
             justify-content: center;
         }
-        .login-container {
+        .signup-container {
             display: flex;
             width: 800px;
-            height: 480px;
+            height: 520px;
             border-radius: 24px;
             overflow: hidden;
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
@@ -28,7 +27,7 @@
             backdrop-filter: blur(12px);
             animation: fadeIn 1.2s cubic-bezier(.4,0,.2,1);
         }
-        .login-left {
+        .signup-left {
             flex: 1;
             background: rgba(255,255,255,0.35);
             padding: 48px 36px;
@@ -36,13 +35,13 @@
             flex-direction: column;
             justify-content: center;
         }
-        .login-left h2 {
+        .signup-left h2 {
             margin: 0 0 24px 0;
             font-size: 2em;
             color: #6f2dbd;
             letter-spacing: 1px;
         }
-        .login-form {
+        .signup-form {
             display: flex;
             flex-direction: column;
             gap: 18px;
@@ -52,7 +51,7 @@
             flex-direction: column;
             gap: 6px;
         }
-        .login-form input {
+        .signup-form input {
             padding: 12px;
             border-radius: 8px;
             border: none;
@@ -60,13 +59,13 @@
             font-size: 1em;
             box-shadow: 0 1px 4px #eee;
         }
-        .login-form label {
+        .signup-form label {
             color: #6f2dbd;
             font-weight: 500;
             font-size: 1em;
         }
-        .login-form button,
-        .login-btn {
+        .signup-form button,
+        .signup-btn {
             background: #6f2dbd;
             color: #fff;
             border: none;
@@ -78,24 +77,24 @@
             margin-top: 8px;
             transition: background 0.2s;
         }
-        .login-form button:hover,
-        .login-btn:hover {
+        .signup-form button:hover,
+        .signup-btn:hover {
             background: #512b81;
         }
-        .signup-link {
+        .login-link {
             margin-top: 18px;
             text-align: center;
             color: #555;
         }
-        .signup-link a {
+        .login-link a {
             color: #6f2dbd;
             text-decoration: none;
             font-weight: 500;
         }
-        .signup-link a:hover {
+        .login-link a:hover {
             text-decoration: underline;
         }
-        .login-right {
+        .signup-right {
             flex: 1;
             background: transparent;
             display: flex;
@@ -103,23 +102,23 @@
             justify-content: center;
             position: relative;
         }
-        .login-illustration {
+        .signup-illustration {
             width: 90%;
             max-width: 340px;
             filter: drop-shadow(0 8px 32px rgba(111,45,189,0.15));
         }
         @media (max-width: 700px) {
-            .login-container {
+            .signup-container {
                 flex-direction: column;
                 width: 95vw;
                 height: auto;
             }
-            .login-right, .login-left {
+            .signup-right, .signup-left {
                 flex: unset;
                 width: 100%;
                 padding: 32px 16px;
             }
-            .login-illustration {
+            .signup-illustration {
                 max-width: 220px;
             }
         }
@@ -130,10 +129,14 @@
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-left">
-            <h2>Welcome Back</h2>
-            <form id="login-form" class="login-form">
+    <div class="signup-container">
+        <div class="signup-left">
+            <h2>Create Your Account</h2>
+            <form id="signup-form" class="signup-form">
+                <div class="form-group">
+                    <label for="nickname"><i class="fas fa-user"></i> Nickname:</label>
+                    <input type="text" id="nickname" required>
+                </div>
                 <div class="form-group">
                     <label for="email"><i class="fas fa-envelope"></i> Email:</label>
                     <input type="email" id="email" required>
@@ -142,15 +145,15 @@
                     <label for="password"><i class="fas fa-lock"></i> Password:</label>
                     <input type="password" id="password" required>
                 </div>
-                <button type="submit" class="login-btn">Login</button>
+                <button type="submit" class="signup-btn">Sign Up</button>
             </form>
-            <div class="signup-link">
-                Don't have an account? <a href="signup.html">Sign up here</a>
+            <div class="login-link">
+                Already have an account? <a href="login.html">Login here</a>
             </div>
         </div>
-        <div class="login-right">
+        <div class="signup-right">
             <!-- Animated SVG illustration directly embedded -->
-            <svg class="login-illustration" width="320" height="320" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg class="signup-illustration" width="320" height="320" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="bg-grad" x1="0" y1="0" x2="320" y2="320" gradientUnits="userSpaceOnUse">
                   <stop stop-color="#a18cd1"/>
