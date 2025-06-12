@@ -26,6 +26,9 @@ const saveEditButton = document.getElementById('saveEditButton');
 const storyViewsModal = document.getElementById('storyViewsModal');
 const storyViewsList = storyViewsModal ? storyViewsModal.querySelector('.views-list') : null;
 
+// Audio button for story video or image+audio
+let storyAudioBtn = document.getElementById('story-audio-btn');
+
 let currentEditingPostId = null;
 
 // Utility: fallback image for missing images
@@ -38,9 +41,21 @@ function setDefaultImage(img) {
 async function logStoryView(story) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user || user.id === story.user_id) return; // Don't log for owner or not logged in
-    await supabase.from('story_views').upsert([
-        { story_id: story.id, user_id: user.id }
-    ], { onConflict: ['story_id', 'user_id'] });
+
+    // Insert or update view with timestamp
+    const { error } = await supabase.from('story_views').upsert([
+        { story_id: story.id, user_id: user.id, viewed_at: new Date().toISOString() }
+    ], { onConflict: ['story_id', 'user_id'], update: ['viewed_at'] });
+
+    if (error) {
+        console.error('Story view insert error:', error);
+    }
+
+    // Update last_seen in users table for online status
+    await supabase
+        .from('users')
+        .update({ last_seen: new Date().toISOString() })
+        .eq('id', user.id);
 }
 
 // --- STORY VIEWS MODAL LOGIC ---
@@ -62,14 +77,16 @@ async function showStoryViewsModal(story) {
         return;
     }
 
-    // Use explicit foreign key join for story_views.user_id -> users.id
+    // Fetch story views with user info and last_seen
     const { data, error } = await supabase
         .from('story_views')
         .select(`
             user_id,
-            users!story_views_user_id_fkey (
+            viewed_at,
+            users (
                 nickname,
-                avatar_url
+                avatar_url,
+                last_seen
             )
         `)
         .eq('story_id', story.id)
@@ -80,12 +97,47 @@ async function showStoryViewsModal(story) {
         return;
     }
 
-    storyViewsList.innerHTML = data.map(v => `
-        <li style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-            <img src="${v.users?.avatar_url || 'assets/images/default-avatar.png'}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">
-            <span>${v.users?.nickname || v.user_id}</span>
-        </li>
-    `).join('');
+    // Update views count if you have a counter in your modal
+    const viewsCount = storyViewsModal.querySelector('.views-count');
+    if (viewsCount) viewsCount.textContent = data.length;
+
+    // Render viewers list with online status
+    storyViewsList.innerHTML = data.map(v => {
+        const lastSeen = v.users?.last_seen ? new Date(v.users.last_seen) : null;
+        const isOnline = lastSeen && (new Date() - lastSeen) < 2 * 60 * 1000; // 2 minutes threshold
+        const timeAgo = lastSeen ? getTimeAgo(lastSeen) : 'Never';
+        return `
+            <li style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                <div style="position:relative">
+                    <img src="${v.users?.avatar_url || 'assets/images/default-avatar.png'}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">
+                    <span style="
+                        position:absolute;
+                        bottom:2px;
+                        right:2px;
+                        width:10px;
+                        height:10px;
+                        border-radius:50%;
+                        background:${isOnline ? '#44b700' : '#ccc'};
+                        border:2px solid white;
+                    "></span>
+                </div>
+                <span>${v.users?.nickname || v.user_id}</span>
+                <span style="font-size:0.8em;color:#888;">${isOnline ? 'Online' : `Last seen ${timeAgo}`}</span>
+            </li>
+        `;
+    }).join('');
+}
+
+// Helper for time ago formatting
+function getTimeAgo(date) {
+    const seconds = Math.floor((new Date() - date) / 1000);
+    if (seconds < 60) return 'just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
 }
 
 // Close story views modal on button click
@@ -98,42 +150,70 @@ if (storyViewsModal) {
     }
 }
 
-// Function to create a story card HTML element
-function createStoryCardElement(storyData, nickname, avatarUrl = 'assets/images/default-avatar.png') {
-    const storyCard = document.createElement('div');
-    storyCard.classList.add('story-card');
-    storyCard.dataset.storyId = storyData.id;
-    storyCard.dataset.userId = storyData.user_id;
+// --- GROUP STORIES BY USER FOR FACEBOOK-LIKE STORY ROW ---
+async function fetchAndDisplayStories() {
+    const storiesGrid = document.querySelector('.stories-grid');
+    if (!storiesGrid) return;
+    // Remove all but the add-story card
+    const addStoryCard = storiesGrid.querySelector('.story-card.add-story');
+    storiesGrid.innerHTML = '';
+    if (addStoryCard) storiesGrid.appendChild(addStoryCard);
 
-    let mediaUrl = '';
-    if (storyData.media_url) {
-        mediaUrl = storyData.media_url;
-    } else if (storyData.storage_path) {
-        const { data: publicUrlData } = supabase.storage
-            .from('story-uploads')
-            .getPublicUrl(storyData.storage_path);
-        mediaUrl = publicUrlData.publicUrl;
+    try {
+        // Only fetch stories that have not expired
+        const { data: stories, error } = await supabase
+            .from('stories')
+            .select('*, user:user_id(nickname, avatar_url)')
+            .gt('expires_at', new Date().toISOString())
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.error('Error fetching stories:', error.message);
+            return;
+        }
+
+        // Group stories by user_id
+        const grouped = {};
+        stories.forEach(story => {
+            if (!grouped[story.user_id]) grouped[story.user_id] = [];
+            grouped[story.user_id].push(story);
+        });
+
+        // For each user, show one story card (the latest story's image/video as preview)
+        Object.values(grouped).forEach(userStories => {
+            const latest = userStories[userStories.length - 1];
+            const nickname = latest.user?.nickname || latest.user?.email || 'User';
+            const avatarUrl = latest.user?.avatar_url || 'assets/images/default-avatar.png';
+            const storyCard = document.createElement('div');
+            storyCard.classList.add('story-card');
+            storyCard.dataset.userId = latest.user_id;
+
+            // Show preview (image or video thumbnail)
+            let previewUrl = latest.media_url;
+            let isVideo = previewUrl && previewUrl.match(/\.(mp4|webm|ogg)$/i);
+            storyCard.innerHTML = `
+                ${isVideo
+                    ? `<video src="${previewUrl}" class="story-media" muted playsinline style="object-fit:cover;width:100%;height:100%;"></video>`
+                    : `<img src="${previewUrl}" class="story-media" style="object-fit:cover;width:100%;height:100%;" onerror="this.src='assets/images/default-avatar.png'">`
+                }
+                <img src="${avatarUrl}" alt="User Avatar" class="user-avatar" onerror="this.src='assets/images/default-avatar.png'">
+                <span class="username">${nickname}</span>
+            `;
+
+            // On click, open modal with all this user's stories for today
+            storyCard.addEventListener('click', () => {
+                allDisplayedStories = userStories;
+                displayStory(0);
+                storyModalOverlay.classList.add('visible');
+                document.body.style.overflow = 'hidden';
+            });
+
+            storiesGrid.appendChild(storyCard);
+        });
+
+    } catch (error) {
+        console.error('An unexpected error occurred while fetching stories:', error);
     }
-
-    const isVideo = mediaUrl.toLowerCase().endsWith('.mp4') || mediaUrl.toLowerCase().endsWith('.webm') || mediaUrl.toLowerCase().endsWith('.ogg');
-
-    storyCard.innerHTML = `
-        ${isVideo ?
-            `<video src="${mediaUrl}" alt="Story Video" class="story-media"></video>` :
-            `<img src="${mediaUrl}" alt="Story Image" class="story-media" onerror="this.src='assets/images/default-avatar.png'">`
-        }
-        <img src="${avatarUrl}" alt="User Avatar" class="user-avatar" onerror="this.src='assets/images/default-avatar.png'">
-        <span class="username">${nickname}</span>
-    `;
-
-    storyCard.addEventListener('click', () => {
-        const clickedStoryIndex = allDisplayedStories.findIndex(story => story.id === storyData.id);
-        if (clickedStoryIndex !== -1) {
-             openFullScreenStoryView(clickedStoryIndex);
-        }
-    });
-
-    return storyCard;
 }
 
 async function displayStory(index) {
@@ -155,6 +235,7 @@ async function displayStory(index) {
     }
     const isVideo = mediaUrl.toLowerCase().endsWith('.mp4') || mediaUrl.toLowerCase().endsWith('.webm') || mediaUrl.toLowerCase().endsWith('.ogg');
 
+    // Audio for video only
     if (isVideo) {
         const videoElement = document.createElement('video');
         videoElement.src = mediaUrl;
@@ -165,11 +246,26 @@ async function displayStory(index) {
         videoElement.classList.add('story-media');
         storyMediaContainer.appendChild(videoElement);
 
+        // Show audio button
+        if (storyAudioBtn) {
+            storyAudioBtn.style.display = 'flex';
+            storyAudioBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            storyAudioBtn.onclick = function() {
+                videoElement.muted = !videoElement.muted;
+                storyAudioBtn.innerHTML = videoElement.muted
+                    ? '<i class="fas fa-volume-mute"></i>'
+                    : '<i class="fas fa-volume-up"></i>';
+            };
+        }
+
         videoElement.addEventListener('loadedmetadata', startStoryTimer);
         videoElement.addEventListener('play', startStoryTimer);
         videoElement.addEventListener('pause', stopStoryTimer);
         videoElement.addEventListener('ended', nextStory);
     } else {
+        if (storyAudioBtn) {
+            storyAudioBtn.style.display = 'none';
+        }
         const imgElement = document.createElement('img');
         imgElement.src = mediaUrl;
         imgElement.alt = 'Story Image';
@@ -193,7 +289,7 @@ async function displayStory(index) {
     storyNextButton.style.display = currentStoryIndex < allDisplayedStories.length - 1 ? 'block' : 'none';
 
     // Log view
-    logStoryView(story);
+    await logStoryView(story);
 
     // Show viewers button if owner
     const { data: { user: currentUser } } = await supabase.auth.getUser();
@@ -289,14 +385,6 @@ function updateProgressBars() {
     });
 }
 
-function openFullScreenStoryView(startIndex = 0) {
-    if (allDisplayedStories.length === 0) return;
-    const validStartIndex = Math.max(0, Math.min(startIndex, allDisplayedStories.length - 1));
-    displayStory(validStartIndex);
-    storyModalOverlay.classList.add('visible');
-    document.body.style.overflow = 'hidden';
-}
-
 function closeFullScreenStoryView() {
     stopStoryTimer();
     storyModalOverlay.classList.remove('visible');
@@ -306,42 +394,7 @@ function closeFullScreenStoryView() {
     let viewersBtn = document.getElementById('storyViewersBtn');
     if (viewersBtn) viewersBtn.remove();
     if (storyViewsModal) storyViewsModal.style.display = 'none';
-}
-
-async function fetchAndDisplayStories() {
-    const storiesGrid = document.querySelector('.stories-grid');
-    if (!storiesGrid) return;
-    const existingStoryCards = storiesGrid.querySelectorAll('.story-card:not(.add-story)');
-    existingStoryCards.forEach(card => card.remove());
-
-    try {
-        const { data: stories, error } = await supabase
-            .from('stories')
-            .select('*, user:user_id(nickname, avatar_url)')
-            .order('created_at', { ascending: false });
-
-        if (error) {
-            console.error('Error fetching stories:', error.message);
-            return;
-        }
-
-        allDisplayedStories = stories;
-
-        const addStoryCard = storiesGrid.querySelector('.story-card.add-story');
-        stories.forEach(story => {
-            const nickname = story.user?.nickname || story.user?.email || 'User';
-            const avatarUrl = story.user?.avatar_url || 'assets/images/default-avatar.png';
-            const storyCardElement = createStoryCardElement(story, nickname, avatarUrl);
-            if (addStoryCard) {
-                storiesGrid.insertBefore(storyCardElement, addStoryCard.nextSibling);
-            } else {
-                storiesGrid.appendChild(storyCardElement);
-            }
-        });
-
-    } catch (error) {
-        console.error('An unexpected error occurred while fetching stories:', error);
-    }
+    if (storyAudioBtn) storyAudioBtn.style.display = 'none';
 }
 
 // --- POSTS SECTION ---
@@ -519,9 +572,17 @@ function createPostCard(post, user) {
     avatar.style.borderRadius = '50%';
     avatar.onerror = function() { this.src = 'assets/images/default-avatar.png'; };
 
+    // --- Make username clickable and link to profile.html?id=USER_ID ---
     const nameTime = document.createElement('div');
-    nameTime.innerHTML = `<strong>${user?.nickname || user?.email || 'User'}</strong><br>
-        <span style="font-size:0.9em;color:#888;">${timeAgo(post.created_at)}</span>`;
+    const usernameLink = document.createElement('a');
+    usernameLink.href = `profile.html?id=${user.id}`;
+    usernameLink.textContent = user?.nickname || user?.email || 'User';
+    usernameLink.style.fontWeight = 'bold';
+    usernameLink.style.textDecoration = 'underline';
+    usernameLink.style.cursor = 'pointer';
+
+    nameTime.appendChild(usernameLink);
+    nameTime.innerHTML += `<br><span style="font-size:0.9em;color:#888;">${timeAgo(post.created_at)}</span>`;
 
     left.appendChild(avatar);
     left.appendChild(nameTime);
@@ -668,7 +729,11 @@ function createPostCard(post, user) {
     // Media grid for multiple images/videos
     if (post.media_urls) {
         let urls = [];
-        try { urls = JSON.parse(post.media_urls); } catch {}
+        if (Array.isArray(post.media_urls)) {
+            urls = post.media_urls;
+        } else {
+            try { urls = JSON.parse(post.media_urls); } catch {}
+        }
         if (urls.length > 0) {
             const mediaGrid = document.createElement('div');
             mediaGrid.className = 'media-grid';
@@ -900,6 +965,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               alert('Failed to sync user profile: ' + upsertError.message);
               return;
             }
+            // --- Story Upload (NO Audio) ---
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
             fileInput.accept = 'image/*,video/*';
@@ -936,6 +1002,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const publicUrl = publicUrlData.publicUrl;
                         const mediaType = file.type.startsWith('image/') ? 'image' : 'video';
 
+                        // Set expires_at to 24 hours from now
+                        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+                        // Insert story WITHOUT audio_url
                         const { data: storyDataArray, error: storyError } = await supabase
                             .from('stories')
                             .insert([
@@ -943,33 +1013,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     user_id: currentUser.id,
                                     storage_path: filePath,
                                     media_url: publicUrl,
-                                    media_type: mediaType
+                                    media_type: mediaType,
+                                    expires_at: expiresAt
                                 }
                             ])
                             .select('*, user:user_id(nickname, avatar_url)');
-
                         if (storyError) {
                             alert('Failed to save story details: ' + storyError.message);
                             addStoryCard.innerHTML = originalAddStoryContent;
                             addStoryCard.style.pointerEvents = 'auto';
                             return;
                         }
-
                         if (storyDataArray && storyDataArray.length > 0) {
-                            const newStory = storyDataArray[0];
-                            const nickname = newStory.user?.nickname || newStory.user?.email || 'User';
-                            const avatarUrl = newStory.user?.avatar_url || 'assets/images/default-avatar.png';
-                            const newStoryCardElement = createStoryCardElement(newStory, nickname, avatarUrl);
-                            const storiesGrid = document.querySelector('.stories-grid');
-                            if (storiesGrid) {
-                                storiesGrid.insertBefore(newStoryCardElement, addStoryCard.nextSibling);
-                                allDisplayedStories.unshift(newStory);
-                            }
+                            fetchAndDisplayStories();
                         }
-
                         addStoryCard.innerHTML = originalAddStoryContent;
                         addStoryCard.style.pointerEvents = 'auto';
-
                     } catch (error) {
                         alert('An unexpected error occurred. Please try again.');
                         addStoryCard.innerHTML = originalAddStoryContent;
@@ -980,9 +1039,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             document.body.appendChild(fileInput);
             fileInput.click();
-            setTimeout(() => {
+            fileInput.addEventListener('change', () => {
                 document.body.removeChild(fileInput);
-            }, 1000);
+            }, { once: true });
         });
     }
 
@@ -1141,7 +1200,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .insert([{
                     user_id: user.id,
                     content,
-                    media_urls: JSON.stringify(media_urls)
+                    media_urls, // Pass as array, not stringified
                 }]);
             if (insertError) {
                 alert('Failed to create post: ' + insertError.message);

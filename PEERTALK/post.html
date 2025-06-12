@@ -20,12 +20,12 @@
             <div class="menu-section">
                 <h3>MENU</h3>
                 <div class="menu-links">
-                    <a href="post.html" class="active" data-section="discover"><i class="fas fa-compass"></i> Discover</a>
-                    <a href="#" data-section="trendings"><i class="fas fa-chart-line"></i> Trendings</a>
-                    <a href="#" data-section="explore"><i class="fas fa-globe"></i> Explore</a>
-                    <a href="#" data-section="notification"><i class="fas fa-bell"></i> Notification</a>
+                    <a href="post.html" class="active" data-section="discover"><i class="fas fa-compass"></i> Discover
+                    <a href="explore.html" data-section="explore"><i class="fas fa-globe"></i> Explore</a>
+                    <a href="notification.html" data-section="notification"><i class="fas fa-bell"></i> Notification</a>
                     <a href="dms.html" data-section="dms"><i class="fas fa-envelope"></i> Dms</a>
                     <a href="#" data-section="groups"><i class="fas fa-users"></i>Groups</a>
+                    <a href="profile.html"data-section="user-profile"><i class="fas fa-user"></i>Profile</a>
                     <a href="#" data-section="settings"><i class="fas fa-cog"></i> Setting</a>
                     <a href="#" data-section="games"><i class="fas fa-gamepad"></i> Games</a>
                 </div>
@@ -83,6 +83,25 @@
                     <button class="story-nav-button story-next-button"><i class="fas fa-chevron-right"></i></button>
                     <!-- Close Button-->
                     <button class="story-close-button"><i class="fas fa-times"></i></button>
+                    <button id="story-audio-btn" style="
+                        position:absolute;
+                        top:18px;
+                        right:60px;
+                        z-index:30;
+                        background:rgba(0,0,0,0.5);
+                        border:none;
+                        border-radius:50%;
+                        width:38px;
+                        height:38px;
+                        display:none;
+                        align-items:center;
+                        justify-content:center;
+                        color:#fff;
+                        font-size:1.3em;
+                        cursor:pointer;
+                    ">
+                        <i class="fas fa-volume-mute"></i>
+                    </button>
                 </div>
             </div>
 
