@@ -7,23 +7,132 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* ...existing styles... */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #1a1a2e;
+        }
+        body, .container {
+            height: 100vh;
+            min-height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        .left-sidebar {
+            width: 260px;
+            background: #16213e;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #eee;
+            height: 100vh;
+            min-width: 260px;
+        }
+        .user-profile {
+            display: flex;
+            align-items: center;
+            padding: 24px 16px 16px 16px;
+            border-bottom: 1px solid #532753;
+        }
+        .user-profile img {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            margin-right: 12px;
+        }
+        .user-info h4 {
+            margin: 0 0 2px 0;
+            font-size: 1.1em;
+            color: #fff;
+        }
+        .user-info p {
+            margin: 0;
+            font-size: 0.95em;
+            color: #bdbdbd;
+        }
+        .menu-section, .library-section {
+            padding: 18px 0 0 0;
+        }
+        .menu-section h3, .library-section h3 {
+            margin: 0 0 8px 24px;
+            font-size: 0.9em;
+            color: #bdbdbd;
+            letter-spacing: 1px;
+        }
+        .menu-links, .library-links {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .menu-links a, .library-links a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.15s;
+        }
+        .menu-links a.active, .menu-links a:hover, .library-links a:hover {
+            background:#16213e;
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: #1a1a2e;
+            min-width: 0;
+        }
+        .content-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 32px 12px 32px;
+            border-bottom: 1px solid #eee;
+        }
+        .header-nav a {
+            color: #1a1a2e;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-right: 18px;
+            border-bottom: 2px solid #fff;
+            padding-bottom: 2px;
+        }
+        .search-bar input {
+            background: #f8f9fa;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            color: #1a1a2e;
+            font-size: 1em;
+            width: 220px;
+        }
         .dms-container {
             display: flex;
-            height: calc(100vh - 60px);
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin: 15px;
-            overflow: hidden;
-            min-width: 1100px;
-            max-width: 95vw;
-            width: 100%;
+            flex: 1;
+            height: 100%;
+            background: #1a1a2e;
+            min-width: 0;
+            margin: 0;
+            border-radius: 0;
+            box-shadow: none;
+            max-width: 100vw;
         }
         .chats-list {
             width: 300px;
             border-right: 1px solid #eee;
+            background: #fff;
             overflow-y: auto;
+            height: 100vh;
             position: relative;
         }
         .chat-item {
@@ -49,10 +158,13 @@
         }
         .chat-info {
             flex: 1;
+            display: flex;
+            flex-direction: column;
         }
         .chat-name {
             font-weight: bold;
             margin-bottom: 5px;
+            color: #350d36;
         }
         .chat-preview {
             color: #666;
@@ -62,11 +174,12 @@
             text-overflow: ellipsis;
         }
         .chat-window {
-            flex: 2.5;
+            flex: 1;
             display: flex;
             flex-direction: column;
             background: #fff;
-            min-width: 600px;
+            min-width: 0;
+            height: 100vh;
         }
         .chat-header {
             padding: 15px 24px;
@@ -89,10 +202,6 @@
             position: absolute;
             bottom: 0;
             right: 0;
-        }
-        .chat-info {
-            display: flex;
-            flex-direction: column;
         }
         .chat-actions {
             display: flex;
@@ -118,8 +227,11 @@
         .chat-messages {
             flex: 1;
             padding: 15px;
-            overflow-y: auto;
             background: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            min-height: 0;
         }
         .message {
             margin-bottom: 15px;
@@ -137,6 +249,7 @@
             background: #fff;
             display: inline-block;
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            word-break: break-word;
         }
         .message.sent .message-content {
             background: #1877f2;
@@ -203,7 +316,6 @@
             max-width: 280px;
             line-height: 1.4;
         }
-        /* New Chat Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -360,6 +472,7 @@
                 <div class="menu-links">
                     <a href="post.html" data-section="discover"><i class="fas fa-compass"></i> Discover</a>
                     <a href="#" data-section="trendings"><i class="fas fa-chart-line"></i> Trendings</a>
+                    <a href="explore.html" data-section="explore"><i class="fas fa-globe"></i> Explore</a>
                     <a href="notification.html" data-section="notification"><i class="fas fa-bell"></i> Notification</a>
                     <a href="dms.html" class="active" data-section="dms"><i class="fas fa-envelope"></i> Dms</a>
                     <a href="#" data-section="groups"><i class="fas fa-users"></i> Groups</a>
@@ -392,40 +505,14 @@
 
             <div class="dms-container">
                 <div class="chats-list">
-                    <!-- Chat list items will be added here by JavaScript -->
+                    <!-- Chat list items will be rendered by JS -->
                     <button class="new-chat-btn" id="newChatBtn">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
-                
                 <div class="chat-window">
-                    <!-- Chat header with actions (Facebook style) -->
-                    <div class="chat-header" style="display:none;">
-                        <div style="display:flex;align-items:center;">
-                            <div class="chat-avatar-wrapper">
-                                <img src="assets/images/default-avatar.png" alt="Chat Avatar" class="chat-avatar">
-                                <div class="user-status online"></div>
-                            </div>
-                            <div class="chat-info">
-                                <div class="chat-name">User Name</div>
-                                <div class="chat-status" id="typingStatus"></div>
-                            </div>
-                        </div>
-                        <div class="chat-actions">
-                            <button class="call-btn" title="Voice Call"><i class="fas fa-phone"></i></button>
-                            <button class="video-btn" title="Video Call"><i class="fas fa-video"></i></button>
-                            <button class="voice-note-btn" title="Send Voice Note"><i class="fas fa-microphone"></i></button>
-                        </div>
-                    </div>
-                    <!-- Chat messages will be rendered here -->
-                    <div class="chat-messages" style="display:none;"></div>
-                    <!-- Chat input area -->
-                    <div class="chat-input" style="display:none;">
-                        <input type="text" placeholder="Type a message..." id="messageInput">
-                        <button id="sendMessageBtn"><i class="fas fa-paper-plane"></i> Send</button>
-                    </div>
-                    <!-- Empty state -->
-                    <div class="empty-state">
+                    <!-- Chat window will be rendered by JS -->
+                    <div class="empty-state" id="emptyState">
                         <i class="fas fa-comments"></i>
                         <p>Select a conversation or start a new one</p>
                     </div>
@@ -451,19 +538,5 @@
     </div>
 
     <script type="module" src="dms.js"></script>
-    <script>
-        // Placeholder JS for call/voice note buttons
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.call-btn').forEach(btn => {
-                btn.onclick = () => alert('Voice call feature coming soon!');
-            });
-            document.querySelectorAll('.video-btn').forEach(btn => {
-                btn.onclick = () => alert('Video call feature coming soon!');
-            });
-            document.querySelectorAll('.voice-note-btn').forEach(btn => {
-                btn.onclick = () => alert('Voice note feature coming soon!');
-            });
-        });
-    </script>
 </body>
 </html>
