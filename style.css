@@ -1,0 +1,865 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #1a1a2e; /* Dark background */
+    color: #e0e0e0; /* Light text */
+}
+
+/* Overall Layout */
+.container {
+    display: grid;
+    grid-template-columns: 250px 1fr 300px; /* Left sidebar, main content, right sidebar */
+    gap: 20px;
+    min-height: 100vh;
+    padding-top: 0; /* Remove padding from body, add to container */
+    width: 90vw;
+    max-width: 90vw;
+    margin: 0 auto;
+}
+
+/* Left Sidebar styles */
+.left-sidebar {
+    background-color: #16213e; /* Slightly lighter dark for sidebar */
+    padding: 20px;
+    /* Make it fixed if desired, adjust padding-top on container */
+    /* position: fixed; */
+    /* top: 0; */
+    /* bottom: 0; */
+    /* left: 0; */
+    overflow-y: auto;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    cursor: pointer;
+}
+
+.user-profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.user-info h4 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.user-info p {
+    font-size: 0.8rem;
+    color: #a0a0a0;
+}
+
+.menu-section,
+.library-section {
+    margin-bottom: 30px;
+}
+
+.menu-section h3,
+.library-section h3 {
+    font-size: 1.1rem;
+    color: #e0e0e0;
+    margin-bottom: 15px;
+}
+
+.menu-links a,
+.library-links a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #e0e0e0;
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.menu-links a i,
+.library-links a i {
+    margin-right: 10px;
+    font-size: 1.1rem;
+}
+
+.menu-links a:hover,
+.library-links a:hover,
+.menu-links a.active {
+    background-color: #0f3460; /* Accent color */
+}
+
+/* Main Content styles */
+.main-content {
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.header-nav a {
+    text-decoration: none;
+    color: #a0a0a0;
+    margin-right: 20px;
+}
+
+.header-nav a.active {
+    color: #e0e0e0;
+    font-weight: bold;
+}
+
+.search-bar input[type="text"] {
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: none;
+    background-color: #2c394b; /* Darker input background */
+    color: #e0e0e0;
+    width: 300px;
+}
+
+.search-bar input[type="text"]::placeholder {
+    color: #a0a0a0;
+}
+
+.stories-section {
+    margin-bottom: 30px;
+}
+
+.stories-grid {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding-bottom: 10px; /* Add some padding for scrollbar */
+}
+
+.story-card {
+    flex: 0 0 120px; /* Fixed width for story cards */
+    height: 180px;
+    background-color: #2c394b; /* Darker card background */
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+}
+
+.story-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.story-card .add-story-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 2rem;
+}
+
+.story-card .user-avatar {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid #e0e0e0;
+}
+
+.story-card .username {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    color: white;
+    font-size: 0.8rem;
+}
+
+.search-post-section {
+    display: flex;
+    align-items: center;
+    background-color: #2c394b;
+    border-radius: 20px;
+    padding: 10px 15px;
+    margin-bottom: 30px;
+}
+
+.search-post-section input[type="text"] {
+    flex-grow: 1;
+    border: none;
+    background: none;
+    color: #e0e0e0;
+    outline: none;
+}
+
+.search-post-section input[type="text"]::placeholder {
+    color: #a0a0a0;
+}
+
+.search-post-section .post-icons i {
+    margin-left: 15px;
+    color: #a0a0a0;
+    cursor: pointer;
+}
+
+.featured-posts-section h3 {
+    font-size: 1.1rem;
+    color: #e0e0e0;
+    margin-bottom: 15px;
+}
+
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.post-card {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px #eee;
+    padding: 1em;
+    margin-bottom: 1.2em;
+    color: #222;
+    font-size: 1em;
+    display: block;
+    width: 60%;
+    min-width: 350px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    margin: 0;
+    justify-content: space-between;
+}
+
+.post-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.post-content {
+    margin-bottom: 0.5em;
+    font-size: 1.05em;
+}
+
+.post-image {
+    max-width:100% ;
+    border-radius: 10px;
+    margin-bottom: 0.5em;
+}
+
+.post-actions {
+    display: flex;
+    gap: 2em;
+    margin-top: 0.5em;
+    color: #555;
+    align-items: center;
+}
+
+.post-actions span {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    font-size: 1em;
+}
+
+.post-actions .like-count,
+.post-actions .comment-count,
+.post-actions .share-count {
+    font-weight: bold;
+    margin-left: 0.2em;
+    color: #1877f2;
+    font-size: 1em;
+}
+
+/* Responsive: On small screens, make post-card full width */
+@media (max-width: 800px) {
+    .post-card {
+        width: 98%;
+        min-width: unset;
+        max-width: 100%;
+    }
+}
+
+/* Right Sidebar styles */
+.right-sidebar {
+    background-color: #16213e;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.suggested-section h3 {
+    font-size: 1.1rem;
+    color: #e0e0e0;
+    margin-bottom: 15px;
+}
+
+.suggested-list .item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.suggested-list .item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.suggested-list .item .info h4 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.suggested-list .item .info p {
+    font-size: 0.8rem;
+    color: #a0a0a0;
+}
+
+.suggested-list .item .actions i {
+    margin-left: 10px;
+    color: #a0a0a0;
+    cursor: pointer;
+}
+
+/* Additional styles for image specific elements */
+
+/* Ensure Font Awesome is linked in HTML head */
+/* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> */
+
+/* Navbar styles */
+.navbar {
+    background-color: #ffffff;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.logo h1 {
+    color: #1877f2;
+    font-size: 1.5rem;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #65676b;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: #1877f2;
+    background-color: #e7f3ff;
+}
+
+.user-menu {
+    position: relative;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: none;
+    min-width: 200px;
+}
+
+.user-menu:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: #1c1e21;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.dropdown-menu a:hover {
+    background-color: #f0f2f5;
+}
+
+/* Main content styles */
+.content {
+    margin-top: 80px;
+    padding: 2rem;
+}
+
+.section {
+    display: none;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section.active {
+    display: block;
+}
+
+/* Home section styles */
+.feed {
+    background-color: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.post-form {
+    margin-bottom: 1.5rem;
+}
+
+.post-form textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 1rem;
+    border: 1px solid #dddfe2;
+    border-radius: 8px;
+    resize: none;
+    margin-bottom: 1rem;
+}
+
+.post-btn {
+    background-color: #1877f2;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.post-btn:hover {
+    background-color: #166fe5;
+}
+
+/* DMs section styles */
+.chat-container {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 1rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    height: calc(100vh - 120px);
+}
+
+.chat-list {
+    border-right: 1px solid #dddfe2;
+    padding: 1rem;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #dddfe2;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+}
+
+.chat-window {
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    padding: 1rem;
+    border-bottom: 1px solid #dddfe2;
+}
+
+.messages {
+    flex-grow: 1;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.message-input {
+    padding: 1rem;
+    border-top: 1px solid #dddfe2;
+    display: flex;
+    gap: 1rem;
+}
+
+.message-input input {
+    flex-grow: 1;
+    padding: 0.75rem;
+    border: 1px solid #dddfe2;
+    border-radius: 20px;
+}
+
+.message-input button {
+    background-color: #1877f2;
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Clubs section styles */
+.clubs-container {
+    background-color: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.clubs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.create-club-btn {
+    background-color: #1877f2;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.clubs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Profile section styles */
+.profile-container {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.profile-header {
+    position: relative;
+}
+
+.profile-cover {
+    height: 200px;
+    background-color: #1877f2;
+}
+
+.profile-info {
+    text-align: center;
+    padding: 1.5rem;
+    margin-top: -60px;
+}
+
+.profile-picture {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid white;
+    margin-bottom: 1rem;
+}
+
+.profile-stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    padding: 1.5rem;
+    border-bottom: 1px solid #dddfe2;
+}
+
+.stat {
+    text-align: center;
+}
+
+.count {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1877f2;
+}
+
+.label {
+    color: #65676b;
+}
+
+.profile-posts {
+    padding: 1.5rem;
+}
+
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+} 
+
+/* --- Full-screen Story Modal Styles ---*/
+
+/*  OverLay that covers the entire screen */
+.story-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+     background-color: rgba(0, 0, 0, 0.9);  /*Semi-transparented bloack background */
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     z-index: 1000; /* Ensure it appears above other elements */
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0.3s, opacity 0.3s ease-in-out;
+}
+
+/*  Class to make the modal visible */
+.story-modal-overlay.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* container for the story content */
+.story-modal-content {
+    position: relative;
+    width: 90%;
+    max-width: 500px;
+    height: 90%;
+    max-height: 800px;
+    background-color: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+}
+
+/* Container for the story media (image/video) */
+.story-media-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Style for the actual media  element (image or video) */
+.story-media-container img,
+.story-media-container video {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+
+/* Header containing user info and progress bar */
+.story-header {
+    position: relative;
+    z-index: 10;
+    padding: 15px;
+    display: flex;
+    gap: 10px;
+    background: linear-gradient(to botton, rgba(0,0,0,0.5), rgba(0,0,0,0));
+}
+
+/*  Container for the progress bars */
+.story-progress-bar-container {
+    display: flex;
+    gap: 5px;
+    width: 100px;
+    height: 4px;
+}
+
+.story-progress-bar {
+    flex-grow: 1;
+    background-color: rgba(255,255,255,0.5);
+    border-radius: 2px;
+    overflow: hidden;
+} 
+
+/* Style for the progress fill within each bar (will be animated by JS) */
+.story-progress-fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    background-color: #fff;
+    transition: width linear;
+}
+
+/* User info section in the header */
+.story-user-info {
+    display: flex;
+    align-items: flex;
+    gap: 10px;
+}
+
+/*  User avatar in the modal */
+.story-user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+/* Username in the modal */
+.story-username {
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+
+
+/* Navigation button (previous and next) */
+
+.story-nav-button {
+    position: absolute;
+    top: 50%;  /*  Center vertically */
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.8);
+    font-size: 30px;
+    cursor: pointer;
+    padding: 10px;
+    z-index: 15;
+    transition: color 0.2s ease;
+}
+
+.story-nav-button:hover {
+    color: #fff;
+}
+
+.story-prev-button {
+    left: 10px;
+}
+
+.story-next-button {
+    right: 10px;
+}
+
+.story-close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.8);
+    font-size: 25px;
+    cursor: pointer;
+    padding: 5px;
+    z-index: 15;
+    transition: color 0.2s ease;
+}
+
+.story-close-button:hover {
+    color: #fff;
+}
+
+button:focus {
+    outline: none;
+}
+
+.post-feed {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+    margin-top: 1em;
+    height: 80%;
+}
+
+.post-card .media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px,1fr));
+    gap: 8px;
+    margin-bottom: 0.5em;
+}
+
+.post-card .media-grid img,
+.post-card .media-grid video{
+    width: 100%;
+    border-radius: 10px;
+    object-fit: cover;
+    max-height: 180px;
+}
+/* Reactions Menu */
+.reactions-menu {
+    position: absolute;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    display: none;
+    padding: 5px 10px;
+    transform: translateY(-100%);
+    z-index: 100;
+    transition: all 0.3s ease;
+}
+
+.reaction-option {
+    display: inline-block;
+    padding: 5px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    font-size: 24px;
+}
+
+.reaction-option:hover {
+    transform: scale(1.4) translateY(-5px);
+}
+
+.like-button {
+    position: relative;
+    display: inline-block;
+}
+
+.like-button:hover .reactions-menu {
+    display: flex;
+    align-items: center;
+}
