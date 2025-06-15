@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .notifications-container {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 400px;
+            height: 100vh;
+            background: #fff;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        .notifications-header {
+            padding: 20px;
+            border-bottom: 1px solid #dbdbdb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 2;
+        }
+
+        .notifications-header h3 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .notifications-list {
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #efefef;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .notification-item:hover {
+            background: #fafafa;
+        }
+
+        .notification-item.unread {
+            background: #f7f9fe;
+        }
+
+        .notification-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-text {
+            margin: 0;
+            font-size: 14px;
+            color: #262626;
+            line-height: 1.4;
+        }
+
+        .notification-text strong {
+            font-weight: 600;
+        }
+
+        .notification-time {
+            font-size: 12px;
+            color: #8e8e8e;
+            margin-top: 4px;
+        }
+
+        .mark-all-read {
+            background: none;
+            border: none;
+            color: #0095f6;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .mark-all-read:hover {
+            color: #00376b;
+        }
+
+        .close-notifications {
+            position: absolute;
+            top: 20px;
+            left: -40px;
+            background: #fff;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        /* Empty state */
+        .empty-notifications {
+            padding: 40px 20px;
+            text-align: center;
+            color: #8e8e8e;
+        }
+
+        .empty-notifications i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: #dbdbdb;
+        }
+
+        .empty-notifications p {
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        /* Navigation styles */
+        .header-nav {
+            background: #fff;
+            border-bottom: 1px solid #dbdbdb;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .nav-left a {
+            color: #262626;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .nav-left a.active {
+            color: #0095f6;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff3040;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: bold;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="header-nav">
+        <div class="nav-left">
+            <a href="post.html">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+            <h1 style="margin: 0; font-size: 16px;">Notifications</h1>
+        </div>
+        <button id="notificationsBtn" class="notifications-btn" style="display: none;">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" style="display: none;">0</span>
+        </button>
+    </nav>
+
+    <div class="notifications-container" id="notificationsContainer">
+        <button class="close-notifications">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="notifications-header">
+            <h3>Notifications</h3>
+            <button class="mark-all-read">Mark all as read</button>
+        </div>
+        <div class="notifications-list" id="notificationsList">
+            <!-- Empty state -->
+            <div class="empty-notifications">
+                <i class="far fa-bell"></i>
+                <p><strong>No notifications yet</strong></p>
+                <p>When someone likes or comments on your posts, you'll see them here.</p>
+            </div>
+            <!-- Notifications will be added here dynamically -->
+        </div>
+    </div>
+
+    <script type="module" src="notifications.js"></script>
+</body>
+</html>

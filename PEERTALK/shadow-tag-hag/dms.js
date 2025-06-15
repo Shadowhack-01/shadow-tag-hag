@@ -40,26 +40,12 @@ async function initializeDMs() {
         }
     });
 
-    // Load existing chats and friends
+    // Load existing chats
     await loadChats();
-    await loadFriendsForChatList();
 
     // Subscribe to new messages and presence
     subscribeToNewMessages();
     subscribeToPresence();
-
-    // Fetch friend requests
-    fetchFriendRequests();
-
-    // If a chat is selected in URL, open it
-    const params = new URLSearchParams(window.location.search);
-    const chatId = params.get('chat_id');
-    if (chatId) {
-        setTimeout(() => {
-            const chatItem = document.querySelector(`[data-chat-id="${chatId}"]`);
-            if (chatItem) chatItem.click();
-        }, 300);
-    }
 }
 
 function debounce(func, wait) {
@@ -97,157 +83,26 @@ async function searchUsers(event) {
         return;
     }
 
-    // For each user, check friend request status
-    for (const user of users) {
-        user.friendStatus = await getFriendStatus(user.id);
-    }
-
     usersList.innerHTML = users.map(user => `
         <div class="user-item" data-user-id="${user.id}">
-            <img src="${user.avatar_url || 'assets/images/default-avatar.png'}" 
-                 alt="User Avatar" 
-                 class="chat-avatar"
-                 onerror="this.src='assets/images/default-avatar.png'">
-            <span>${user.nickname || user.email}</span>
-            ${renderFriendButton(user)}
+            <div class="chat-avatar-wrapper">
+                <img src="${user.avatar_url || 'assets/images/default-avatar.png'}" 
+                     alt="User Avatar" 
+                     class="chat-avatar"
+                     onerror="this.src='assets/images/default-avatar.png'">
+                <div class="user-status ${getOnlineStatus(user.last_seen)}"></div>
+            </div>
+            <div class="chat-info">
+                <div class="chat-name">${user.nickname || user.email}</div>
+                <div class="chat-preview">${user.last_seen ? timeAgo(user.last_seen) : 'Offline'}</div>
+            </div>
         </div>
     `).join('');
 
-    // Attach event listeners for Add Friend buttons
-    usersList.querySelectorAll('.add-friend-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const receiverId = btn.getAttribute('data-user-id');
-            sendFriendRequest(receiverId, btn);
-        });
-    });
-
-    // Optionally, clicking the user-item (not the button) can start a chat
     usersList.querySelectorAll('.user-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-            if (e.target.classList.contains('add-friend-btn')) return;
-            startNewChat(item.dataset.userId);
-        });
+        item.addEventListener('click', () => startNewChat(item.dataset.userId));
     });
 }
-
-function renderFriendButton(user) {
-    if (user.friendStatus === 'pending') {
-        return `<button class="add-friend-btn" data-user-id="${user.id}" disabled>Pending</button>`;
-    }
-    if (user.friendStatus === 'accepted') {
-        return `<button class="add-friend-btn" data-user-id="${user.id}" disabled>Friends</button>`;
-    }
-    return `<button class="add-friend-btn" data-user-id="${user.id}">Add Friend</button>`;
-}
-
-async function getFriendStatus(otherUserId) {
-    // Check if already friends or request pending
-    const { data: existing } = await supabase
-        .from('friend_requests')
-        .select('id, status, sender_id, receiver_id')
-        .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${currentUser.id})`)
-        .order('created_at', { ascending: false })
-        .limit(1);
-    if (existing && existing.length > 0) {
-        return existing[0].status;
-    }
-    // Check if already friends
-    const { data: friends } = await supabase
-        .from('friends')
-        .select('id')
-        .or(`and(user1_id.eq.${currentUser.id},user2_id.eq.${otherUserId}),and(user1_id.eq.${otherUserId},user2_id.eq.${currentUser.id})`)
-        .limit(1);
-    if (friends && friends.length > 0) {
-        return 'accepted';
-    }
-    return null;
-}
-
-async function sendFriendRequest(receiverId, btn) {
-    // Prevent sending to self
-    if (receiverId === currentUser.id) {
-        alert("You can't add yourself as a friend.");
-        return;
-    }
-    // Check if already friends or request pending
-    const { data: existing } = await supabase
-        .from('friend_requests')
-        .select('id, status')
-        .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${receiverId}),and(sender_id.eq.${receiverId},receiver_id.eq.${currentUser.id})`)
-        .in('status', ['pending', 'accepted']);
-    if (existing && existing.length > 0) {
-        alert('Friend request already sent or you are already friends.');
-        return;
-    }
-    const { error } = await supabase
-        .from('friend_requests')
-        .insert([{ sender_id: currentUser.id, receiver_id: receiverId, status: 'pending' }]);
-    if (error) {
-        alert('Error sending friend request: ' + error.message);
-    } else {
-        if (btn) {
-            btn.textContent = 'Pending';
-            btn.disabled = true;
-        }
-        alert('Friend request sent!');
-        fetchFriendRequests();
-    }
-}
-
-async function fetchFriendRequests() {
-    const { data, error } = await supabase
-        .from('friend_requests')
-        .select('id, sender_id, status, sender:sender_id(nickname,avatar_url)')
-        .eq('receiver_id', currentUser.id)
-        .eq('status', 'pending');
-    const container = document.getElementById('friendRequests');
-    container.innerHTML = '';
-    if (data && data.length > 0) {
-        data.forEach(req => {
-            const div = document.createElement('div');
-            div.innerHTML = `
-                <img src="${req.sender?.avatar_url || 'assets/images/default-avatar.png'}" style="width:24px;height:24px;border-radius:50%;vertical-align:middle;margin-right:6px;">
-                <span><b>${req.sender?.nickname || req.sender_id}</b> sent you a friend request.</span>
-                <button onclick="window.respondToFriendRequest('${req.id}', true)">Accept</button>
-                <button class="reject" onclick="window.respondToFriendRequest('${req.id}', false)">Reject</button>
-            `;
-            container.appendChild(div);
-        });
-    }
-}
-window.respondToFriendRequest = async function(requestId, accept) {
-    await supabase
-        .from('friend_requests')
-        .update({ status: accept ? 'accepted' : 'rejected' })
-        .eq('id', requestId);
-    if (accept) {
-        // Get the request to know both user IDs
-        const { data: req } = await supabase
-            .from('friend_requests')
-            .select('*')
-            .eq('id', requestId)
-            .single();
-
-        // Check if friendship already exists to avoid 409 conflict
-        const { data: existing } = await supabase
-            .from('friends')
-            .select('id')
-            .or(`and(user1_id.eq.${req.sender_id},user2_id.eq.${req.receiver_id}),and(user1_id.eq.${req.receiver_id},user2_id.eq.${req.sender_id})`)
-            .limit(1);
-
-        if (!existing || existing.length === 0) {
-            await supabase.from('friends').insert([
-                { user1_id: req.sender_id, user2_id: req.receiver_id },
-                { user1_id: req.receiver_id, user2_id: req.sender_id }
-            ]);
-        }
-        // Optionally, reload chats and friends
-        await loadChats();
-        await loadFriendsForChatList();
-    }
-    fetchFriendRequests(); // Refresh requests
-};
 
 async function startNewChat(userId) {
     // Check if chat already exists between these two users
@@ -284,27 +139,11 @@ async function startNewChat(userId) {
     // Close modal and open chat
     document.getElementById('newChatModal').style.display = 'none';
     await loadChats();
-    await loadFriendsForChatList();
-    // Update URL for refresh persistence
-    window.history.replaceState({}, '', `?chat_id=${chatId}`);
     const chatItem = document.querySelector(`[data-chat-id="${chatId}"]`);
     if (chatItem) chatItem.click();
 }
 
 async function loadChats() {
-    // Only show chats with users who are friends (accepted)
-    const { data: friendsData } = await supabase
-        .from('friends')
-        .select('user1_id, user2_id')
-        .or(`user1_id.eq.${currentUser.id},user2_id.eq.${currentUser.id}`);
-    const friendIds = new Set();
-    if (friendsData) {
-        friendsData.forEach(f => {
-            if (f.user1_id !== currentUser.id) friendIds.add(f.user1_id);
-            if (f.user2_id !== currentUser.id) friendIds.add(f.user2_id);
-        });
-    }
-
     const { data: chats, error } = await supabase
         .from('chats')
         .select(`
@@ -314,6 +153,8 @@ async function loadChats() {
             unread_count:messages(count)
         `)
         .eq('participants.user_id', currentUser.id)
+        .eq('messages.read', false)
+        .neq('messages.user_id', currentUser.id)
         .order('updated_at', { ascending: false });
 
     if (error) {
@@ -322,13 +163,13 @@ async function loadChats() {
     }
 
     const chatsList = document.querySelector('.chats-list');
-    chatsList.querySelectorAll('.chat-item').forEach(e => e.remove());
+    chatsList.innerHTML = '';
 
     for (const chat of chats) {
         const otherParticipantId = chat.participants
             .find(p => p.user_id !== currentUser.id)?.user_id;
 
-        if (!otherParticipantId || !friendIds.has(otherParticipantId)) continue;
+        if (!otherParticipantId) continue;
 
         const { data: userData } = await supabase
             .from('users')
@@ -363,54 +204,8 @@ async function loadChats() {
             </div>
         `;
 
-        chatItem.addEventListener('click', () => {
-            window.history.replaceState({}, '', `?chat_id=${chat.id}`);
-            openChat(chat.id, userData);
-        });
+        chatItem.addEventListener('click', () => openChat(chat.id, userData));
         chatsList.appendChild(chatItem);
-    }
-    // After loading chats, also show all friends (even if no chat exists)
-    await loadFriendsForChatList(friendIds);
-}
-
-async function loadFriendsForChatList(existingFriendIdsSet = null) {
-    // Fetch all friends
-    const { data: friendsData } = await supabase
-        .from('friends')
-        .select('user1_id, user2_id')
-        .or(`user1_id.eq.${currentUser.id},user2_id.eq.${currentUser.id}`);
-    const friendIds = [];
-    if (friendsData) {
-        friendsData.forEach(f => {
-            if (f.user1_id !== currentUser.id) friendIds.push(f.user1_id);
-            if (f.user2_id !== currentUser.id) friendIds.push(f.user2_id);
-        });
-    }
-    if (friendIds.length > 0) {
-        const { data: users } = await supabase
-            .from('users')
-            .select('id, nickname, avatar_url, last_seen')
-            .in('id', friendIds);
-
-        const chatsList = document.querySelector('.chats-list');
-        users.forEach(user => {
-            // If already rendered by chat, skip
-            if (existingFriendIdsSet && existingFriendIdsSet.has(user.id)) return;
-            const friendDiv = document.createElement('div');
-            friendDiv.className = 'chat-item friend-highlight';
-            friendDiv.innerHTML = `
-                <div class="chat-avatar-wrapper">
-                    <img src="${user.avatar_url || 'assets/images/default-avatar.png'}" class="chat-avatar">
-                    <div class="user-status ${getOnlineStatus(user.last_seen)}"></div>
-                </div>
-                <div class="chat-info">
-                    <div class="chat-name">${user.nickname || 'User'}</div>
-                    <div class="chat-preview"><span class="new-friend-badge">New Friend</span> Start a chat</div>
-                </div>
-            `;
-            friendDiv.addEventListener('click', () => startNewChat(user.id));
-            chatsList.appendChild(friendDiv);
-        });
     }
 }
 
@@ -615,7 +410,6 @@ function subscribeToNewMessages() {
                     loadMessages(currentChat.id);
                 }
                 loadChats();
-                loadFriendsForChatList();
             }
         )
         .on('postgres_changes',

@@ -416,37 +416,44 @@
             margin-right: 12px;
             object-fit: cover;
         }
-        .add-friend-btn {
-            margin-left: auto;
-            background: #31a24c;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            padding: 6px 12px;
-            cursor: pointer;
-            font-size: 0.95em;
-            transition: background 0.2s;
-        }
-        .add-friend-btn:hover {
-            background: #228b3c;
-        }
-        .friend-request-notifications {
-            padding: 12px;
-            background: #fffbe7;
-            border-bottom: 1px solid #eee;
-        }
-        .friend-request-notifications button {
-            margin-left: 8px;
+        .new-chat-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
             background: #1877f2;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 4px 10px;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            font-size: 0.95em;
+            border: none;
+            box-shadow: 0 2px 8px rgba(24,119,242,0.4);
+            transition: all 0.2s;
         }
-        .friend-request-notifications button.reject {
-            background: #e53935;
+        .new-chat-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(24,119,242,0.5);
+        }
+        .chat-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .chat-time {
+            font-size: 0.75em;
+            color: #666;
+        }
+        .unread-badge {
+            background: #1877f2;
+            color: white;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 0.75em;
+            margin-left: 8px;
         }
     </style>
 </head>
@@ -460,7 +467,6 @@
                     <p>Creator & Editor</p>
                 </div>
             </div>
-            <div id="friendRequests" class="friend-request-notifications"></div>
             <div class="menu-section">
                 <h3>MENU</h3>
                 <div class="menu-links">

@@ -92,10 +92,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.log('Auth user created successfully:', data.user);
                     
                     try {
-                        // Use upsert to avoid duplicate key errors
+                        // Create the user profile in the public users table
                         const { error: profileError } = await supabase
                             .from('users')
-                            .upsert([
+                            .insert([
                                 {
                                     id: data.user.id,
                                     nickname,
@@ -125,6 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         `;
                     } catch (profileError) {
                         console.error('Profile creation failed:', profileError);
+                        // If profile creation fails, we should probably clean up the auth user
+                        // But for now, we'll just show an error
                         throw new Error('Account created but profile setup failed. Please contact support.');
                     }
                 }
@@ -145,6 +147,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const { data: { user }, error } = await supabase.auth.getUser();
             
             if (error) {
+                // Only log if you want to debug
+                // console.error('Auth error:', error);
                 return;
             }
 
@@ -160,6 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             // Only log if you want to debug
+            // console.warn('Auth check skipped:', error);
         }
     };
 

@@ -1,0 +1,121 @@
+<!--PeerTalk: Home Page (index.html)-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PeerTalk - Home</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body.index-page {
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(120deg, #a18cd1 0%, #fbc2eb 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .index-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 900px;
+            max-width: 98vw;
+            min-height: 480px;
+            background: rgba(255,255,255,0.13);
+            border-radius: 32px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+            backdrop-filter: blur(10px);
+            padding: 0 32px;
+            gap: 0;
+            animation: fadeIn 1.2s cubic-bezier(.4,0,.2,1);
+        }
+        .text-box {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 0 32px 0 0;
+            animation: fadeIn 1.2s cubic-bezier(.4,0,.2,1);
+        }
+        .text-box h1 {
+            font-size: 2.6em;
+            color: #6f2dbd;
+            margin-bottom: 0.3em;
+            margin-top: 0;
+        }
+        .text-box p {
+            font-size: 1.25em;
+            color: #444;
+            margin-bottom: 2em;
+        }
+        .text-box button {
+            background: #6f2dbd;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 0.9em 2.2em;
+            font-size: 1.15em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #eee;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .text-box button:hover {
+            background: #512b81;
+            transform: translateY(-2px) scale(1.04);
+        }
+        .mascot {
+            flex: 1;
+            width: 340px;
+            max-width: 38vw;
+            min-width: 180px;
+            height: auto;
+            display: block;
+            margin-left: 24px;
+            filter: drop-shadow(0 8px 32px rgba(111,45,189,0.10));
+            animation: mascotFloat 3s ease-in-out infinite alternate;
+        }
+        @keyframes mascotFloat {
+            from { transform: translateY(0);}
+            to   { transform: translateY(-18px);}
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(40px);}
+            to   { opacity: 1; transform: translateY(0);}
+        }
+        @media (max-width: 900px) {
+            .index-container {
+                flex-direction: column-reverse;
+                width: 98vw;
+                min-height: 0;
+                padding: 24px 8px;
+            }
+            .text-box {
+                align-items: center;
+                padding: 0;
+                text-align: center;
+            }
+            .mascot {
+                margin: 0 0 18px 0;
+                width: 180px;
+                max-width: 60vw;
+            }
+        }
+    </style>
+</head>
+<body class="index-page">
+    <div class="index-container">
+        <div class="text-box">
+            <h1>Welcome to PeerTalk 👋</h1>
+            <p>A space to connect, support, and grow with peers</p>
+            <button onclick="window.location.href='signup.html'">Get Started</button>
+        </div>
+        <img src="assets/mascot.svg" alt="Mascot" class="mascot">
+    </div>
+    <script type="module" src="auth.js"></script>
+</body>
+</html>

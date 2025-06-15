@@ -1,0 +1,208 @@
+<!-- PeerTalk: Login Page-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Peer Talk</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(120deg, #a18cd1 0%, #fbc2eb 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            display: flex;
+            width: 800px;
+            height: 480px;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(12px);
+            animation: fadeIn 1.2s cubic-bezier(.4,0,.2,1);
+        }
+        .login-left {
+            flex: 1;
+            background: rgba(255,255,255,0.35);
+            padding: 48px 36px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .login-left h2 {
+            margin: 0 0 24px 0;
+            font-size: 2em;
+            color: #6f2dbd;
+            letter-spacing: 1px;
+        }
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .login-form input {
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255,255,255,0.7);
+            font-size: 1em;
+            box-shadow: 0 1px 4px #eee;
+        }
+        .login-form label {
+            color: #6f2dbd;
+            font-weight: 500;
+            font-size: 1em;
+        }
+        .login-form button,
+        .login-btn {
+            background: #6f2dbd;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 0;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+        .login-form button:hover,
+        .login-btn:hover {
+            background: #512b81;
+        }
+        .signup-link {
+            margin-top: 18px;
+            text-align: center;
+            color: #555;
+        }
+        .signup-link a {
+            color: #6f2dbd;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+        .login-right {
+            flex: 1;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .login-illustration {
+            width: 90%;
+            max-width: 340px;
+            filter: drop-shadow(0 8px 32px rgba(111,45,189,0.15));
+        }
+        @media (max-width: 700px) {
+            .login-container {
+                flex-direction: column;
+                width: 95vw;
+                height: auto;
+            }
+            .login-right, .login-left {
+                flex: unset;
+                width: 100%;
+                padding: 32px 16px;
+            }
+            .login-illustration {
+                max-width: 220px;
+            }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(40px);}
+            to   { opacity: 1; transform: translateY(0);}
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-left">
+            <h2>Welcome Back</h2>
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope"></i> Email:</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> Password:</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+            <div class="signup-link">
+                Don't have an account? <a href="signup.html">Sign up here</a>
+            </div>
+        </div>
+        <div class="login-right">
+            <!-- Animated SVG illustration directly embedded -->
+            <svg class="login-illustration" width="320" height="320" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="bg-grad" x1="0" y1="0" x2="320" y2="320" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#a18cd1"/>
+                  <stop offset="1" stop-color="#fbc2eb"/>
+                </linearGradient>
+                <radialGradient id="glow" cx="50%" cy="50%" r="60%" fx="50%" fy="50%">
+                  <stop offset="0%" stop-color="#fff" stop-opacity="0.7"/>
+                  <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+              <rect width="320" height="320" rx="40" fill="url(#bg-grad)" />
+              <ellipse cx="160" cy="260" rx="90" ry="18" fill="url(#glow)">
+                <animate attributeName="rx" values="90;100;90" dur="2s" repeatCount="indefinite"/>
+                <animate attributeName="ry" values="18;22;18" dur="2s" repeatCount="indefinite"/>
+              </ellipse>
+              <g>
+                <rect x="90" y="70" width="140" height="140" rx="20" fill="#fff" fill-opacity="0.15" stroke="#fff" stroke-width="2"/>
+                <rect x="110" y="90" width="100" height="100" rx="16" fill="#fff" fill-opacity="0.25" stroke="#fff" stroke-width="1.5"/>
+                <rect x="130" y="110" width="60" height="60" rx="12" fill="#fff" fill-opacity="0.35" stroke="#fff" stroke-width="1"/>
+                <g>
+                  <circle cx="160" cy="140" r="8" fill="#6f2dbd">
+                    <animate attributeName="r" values="8;12;8" dur="1.5s" repeatCount="indefinite"/>
+                  </circle>
+                  <circle cx="160" cy="140" r="24" fill="none" stroke="#6f2dbd" stroke-width="2" stroke-dasharray="4 6">
+                    <animateTransform attributeName="transform" type="rotate" from="0 160 140" to="360 160 140" dur="3s" repeatCount="indefinite"/>
+                  </circle>
+                </g>
+                <rect x="150" y="180" width="20" height="30" rx="6" fill="#6f2dbd" fill-opacity="0.7">
+                  <animate attributeName="y" values="180;170;180" dur="2s" repeatCount="indefinite"/>
+                </rect>
+              </g>
+              <g>
+                <rect x="120" y="220" width="80" height="12" rx="6" fill="#fff" fill-opacity="0.3"/>
+                <rect x="140" y="238" width="40" height="8" rx="4" fill="#fff" fill-opacity="0.2"/>
+              </g>
+              <g>
+                <circle cx="60" cy="90" r="6" fill="#fff" fill-opacity="0.3">
+                  <animate attributeName="cy" values="90;80;90" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="260" cy="70" r="5" fill="#fff" fill-opacity="0.3">
+                  <animate attributeName="cy" values="70;60;70" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="80" cy="240" r="4" fill="#fff" fill-opacity="0.3">
+                  <animate attributeName="cy" values="240;250;240" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="240" cy="250" r="5" fill="#fff" fill-opacity="0.3">
+                  <animate attributeName="cy" values="250;260;250" dur="2s" repeatCount="indefinite"/>
+                </circle>
+              </g>
+            </svg>
+        </div>
+    </div>
+    <script type="module" src="auth.js"></script>
+</body>
+</html>
